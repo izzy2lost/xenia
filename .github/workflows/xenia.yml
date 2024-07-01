@@ -35,7 +35,8 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v3
         with:
-          fetch-depth: 0 # Ensure the full repository is checked out
+          submodules: true  # Ensure submodules are checked out
+          fetch-depth: 0    # Ensure the full repository is checked out
 
       - name: Generate Self-Signed Certificate
         id: generate_cert
