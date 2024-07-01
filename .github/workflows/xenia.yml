@@ -31,9 +31,6 @@ jobs:
     steps:
       - name: Add msbuild to PATH
         uses: microsoft/setup-msbuild@v2
-        
-      - name: Setup NuGet.exe for use with actions
-        uses: NuGet/setup-nuget@v2
 
       - name: Checkout Repository
         uses: actions/checkout@v3
@@ -51,9 +48,6 @@ jobs:
         id: set_package_name
         run: |
           echo "PACKAGE_NAME=${{ github.event.inputs.package_name }}_${{ github.event.inputs.tag_name }}" >> $GITHUB_ENV
-
-      - name: Restore NuGet Packages
-        run: nuget restore $env:ProjectPath
 
       - name: App Build
         run: |
