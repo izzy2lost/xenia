@@ -61,41 +61,6 @@ jobs:
           Write-Host "xb premake step completed."
         shell: pwsh
 
-      - name: Add Xenia-Canary-UWP to Solution
-        run: |
-          # Assuming this step is manual, skipping it
-        shell: pwsh
-
-      - name: Remove file_picker.win.cc
-        run: |
-          Remove-Item -Path "path\to\file_picker.win.cc"
-        shell: pwsh
-
-      - name: Remove zstd from Solution
-        run: |
-          # Assuming this step is manual, skipping it
-        shell: pwsh
-
-      - name: Add zstd.vcxproj
-        run: |
-          # Assuming this step is manual, skipping it
-        shell: pwsh
-
-      - name: Retarget zstd for Latest Visual Studio
-        run: |
-          # Assuming this step is manual, skipping it
-        shell: pwsh
-
-      - name: Add zstd to zarchive References
-        run: |
-          # Assuming this step is manual, skipping it
-        shell: pwsh
-
-      - name: Remove zstd.rc
-        run: |
-          Remove-Item -Path "third_party\zstd\build\VS2010\zstd\zstd.rc"
-        shell: pwsh
-
       - name: Compile Solution
         run: |
           msbuild xenia.sln /p:Configuration=Release /p:Platform=x64 /t:build /p:PlatformToolset=v143
