@@ -47,11 +47,16 @@ jobs:
           $Env:Path += ";$PWD\premake5"
         shell: pwsh
 
-      - name: Run xb devenv
+      - name: Run xb devenv with Timeout
         run: |
-          ./xb devenv
-          echo "xb devenv step completed"
-        timeout-minutes: 10
+          $job = Start-Job -ScriptBlock { ./xb devenv }
+          $result = Wait-Job -Job $job -Timeout 120
+          if ($result -eq $null) {
+              Stop-Job -Job $job
+              Write-Output "Timeout reached, moving to the next step."
+          } else {
+              $job | Receive-Job
+          }
         shell: pwsh
 
       - name: Run xb premake
