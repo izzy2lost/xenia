@@ -47,23 +47,14 @@ jobs:
           $Env:Path += ";$PWD\premake5"
         shell: pwsh
 
-      - name: Run xb devenv with Timeout
+      - name: Run xb devenv
         run: |
-          $startTime = [DateTime]::UtcNow
-          $job = Start-Job -ScriptBlock { Invoke-Expression -Command "./xb devenv" }
-          $result = Wait-Job -Job $job -Timeout 120
-          if (-not $result) {
-              Stop-Job -Job $job
-              Write-Output "Timeout reached, moving to the next step."
-          } else {
-              $job | Receive-Job
-              Write-Output "xb devenv step completed within the timeout."
-          }
+          Invoke-Expression -Command "./xb devenv"
         shell: pwsh
 
       - name: Run xb premake
         run: |
-          ./xb premake
+          Invoke-Expression -Command "./xb premake"
         shell: pwsh
 
       - name: Add Xenia-Canary-UWP to Solution
