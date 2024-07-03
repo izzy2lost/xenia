@@ -40,10 +40,9 @@ jobs:
       - name: Setup NuGet
         uses: NuGet/setup-nuget@v1
 
-      - name: Install Dependencies
+      - name: Install Premake5
         run: |
           choco install premake5
-          choco install visualstudio2019buildtools --include-optional
         shell: pwsh
 
       - name: Run xb devenv
@@ -95,7 +94,7 @@ jobs:
 
       - name: Compile Solution
         run: |
-          msbuild xenia.sln /p:Configuration=Release /p:Platform=x64
+          msbuild xenia.sln /p:Configuration=Release /p:Platform=x64 /t:build /p:PlatformToolset=v143
         shell: pwsh
 
       - name: Generate Self-Signed Certificate
