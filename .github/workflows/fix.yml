@@ -1,0 +1,47 @@
+name: Clone and Upload Xenia Repository
+
+on:
+  workflow_dispatch:
+
+jobs:
+  clone-and-upload:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          repository: izzy2lost/xenia
+          submodules: true
+          fetch-depth: 0
+
+      - name: Download and Setup Premake5
+        run: |
+          Invoke-WebRequest -Uri "https://github.com/premake/premake-core/releases/download/v5.0.0-alpha15/premake-5.0.0-alpha15-windows.zip" -OutFile "premake5.zip"
+          Expand-Archive premake5.zip -DestinationPath .\premake5
+          $Env:Path += ";$PWD\premake5"
+        shell: pwsh
+
+      - name: Run xb devenv
+        run: |
+          $job = Start-Job -ScriptBlock { ./xb devenv }
+          Start-Sleep -Seconds 60
+          Stop-Job -Name $job.Name
+          Write-Host "xb devenv step completed."
+        shell: pwsh
+
+      - name: Run xb premake
+        run: |
+          Start-Process -FilePath pwsh -ArgumentList "-NoProfile -ExecutionPolicy Bypass -Command ./xb premake" -NoNewWindow -Wait
+          Write-Host "xb premake step completed."
+        shell: pwsh
+
+      - name: Zip repository
+        run: |
+          Compress-Archive -Path . -DestinationPath xenia.zip
+        
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: xenia-repo
+          path: xenia.zip
