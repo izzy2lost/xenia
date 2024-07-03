@@ -39,14 +39,9 @@ jobs:
       - name: Setup NuGet
         uses: NuGet/setup-nuget@v1
 
-      - name: Debug NuGet Config
-        run: |
-          Get-Content .\xenia-canary-uwp\nuget.config
-        shell: pwsh
-
       - name: Restore NuGet packages
         run: |
-          nuget restore $env:ProjectPath -ConfigFile .\xenia-canary-uwp\nuget.config
+          nuget restore $env:ProjectPath
         shell: pwsh
 
       - name: Generate Self-Signed Certificate
