@@ -40,9 +40,11 @@ jobs:
       - name: Setup NuGet
         uses: NuGet/setup-nuget@v1
 
-      - name: Install Premake5
+      - name: Download and Setup Premake5
         run: |
-          choco install premake5
+          Invoke-WebRequest -Uri "https://github.com/premake/premake-core/releases/download/v5.0.0-alpha15/premake-5.0.0-alpha15-windows.zip" -OutFile "premake5.zip"
+          Expand-Archive premake5.zip -DestinationPath .\premake5
+          $Env:Path += ";$PWD\premake5"
         shell: pwsh
 
       - name: Run xb devenv
