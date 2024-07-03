@@ -49,13 +49,13 @@ jobs:
 
       - name: Run xb devenv with Timeout
         run: |
-          $job = Start-Job -ScriptBlock { ./xb devenv }
-          $result = Wait-Job -Job $job -Timeout 120
-          if ($result -eq $null) {
-              Stop-Job -Job $job
-              Write-Output "Timeout reached, moving to the next step."
+          $startTime = [DateTime]::UtcNow
+          Start-Process -FilePath "./xb" -ArgumentList "devenv" -NoNewWindow -Wait
+          $duration = ([DateTime]::UtcNow - $startTime).TotalMinutes
+          if ($duration -ge 2) {
+            Write-Output "Timeout reached, moving to the next step."
           } else {
-              $job | Receive-Job
+            Write-Output "xb devenv step completed within the timeout."
           }
         shell: pwsh
 
