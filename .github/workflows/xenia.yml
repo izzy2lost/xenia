@@ -1,6 +1,5 @@
 name: Xenia Canary UWP Builder
 
-# Controls when the workflow will run
 on:
   workflow_dispatch:
     inputs:
@@ -13,7 +12,6 @@ on:
         required: true
         default: 'Xenia-Canary-UWP'
 
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   build:
     runs-on: windows-2022
@@ -35,17 +33,20 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v3
         with:
-          submodules: true  # Ensure submodules are checked out
-          fetch-depth: 0    # Ensure the full repository is checked out
+          submodules: true
+          fetch-depth: 0
 
       - name: Setup NuGet
         uses: NuGet/setup-nuget@v1
 
+      - name: Debug NuGet Config
+        run: |
+          Get-Content .\nuget.config
+        shell: pwsh
+
       - name: Restore NuGet packages
         run: |
-          msbuild $env:ProjectPath /t:restore `
-            /p:Platform=$env:Platform `
-            /p:Configuration=$env:Configuration
+          nuget restore $env:ProjectPath -ConfigFile .\nuget.config
         shell: pwsh
 
       - name: Generate Self-Signed Certificate
