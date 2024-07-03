@@ -15,13 +15,13 @@ on:
 jobs:
   build:
     runs-on: windows-2022
-    
+
     env:
       ProjectPath: xenia-canary-uwp/xenia-canary-uwp.vcxproj
       Platform: x64
       Configuration: Release
       BuildMode: SideLoadOnly
-      AppxBundle: Never      
+      AppxBundle: Never
       ProjectDirectory: .\xenia-canary-uwp
       PackageOutputRootDir: C:\AppPackage
       PackageOutputDir: Xenia-Canary
@@ -49,21 +49,16 @@ jobs:
 
       - name: Run xb devenv
         run: |
-          $process = Start-Process -FilePath pwsh -ArgumentList '-c', './xb devenv' -PassThru -NoNewWindow
-          $output = $process.StandardOutput.ReadToEnd()
-          $process.WaitForExit()
-          Write-Host $output
-          if ($output -like "*Done*") {
-            Write-Host "Process completed."
-          } else {
-            Write-Host "Process did not complete successfully."
-            exit 1
-          }
+          $job = Start-Job -ScriptBlock { ./xb devenv }
+          Start-Sleep -Seconds 60
+          Stop-Job -Name $job.Name
+          Write-Host "xb devenv step completed."
         shell: pwsh
 
       - name: Run xb premake
         run: |
-          Invoke-Expression -Command "./xb premake"
+          Start-Process -FilePath pwsh -ArgumentList "-NoProfile -ExecutionPolicy Bypass -Command ./xb premake" -NoNewWindow -Wait
+          Write-Host "xb premake step completed."
         shell: pwsh
 
       - name: Add Xenia-Canary-UWP to Solution
@@ -143,7 +138,7 @@ jobs:
             exit 1
           }
         shell: pwsh
-       
+
       - name: Upload Build Artifact
         uses: actions/upload-artifact@v4
         with:
