@@ -38,6 +38,13 @@ jobs:
           submodules: true  # Ensure submodules are checked out
           fetch-depth: 0    # Ensure the full repository is checked out
 
+      - name: Setup NuGet
+        uses: NuGet/setup-nuget@v1
+
+      - name: Restore NuGet packages
+        run: nuget restore $env:ProjectPath
+        shell: pwsh
+
       - name: Generate Self-Signed Certificate
         id: generate_cert
         run: |
