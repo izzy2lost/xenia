@@ -1,44 +1,19 @@
-name: Xenia Canary UWP Builder
+name: Clone and Upload Xenia Repository
 
 on:
   workflow_dispatch:
-    inputs:
-      tag_name:
-        description: 'Tag Name'
-        required: true
-        default: 'v1.0.0'
-      package_name:
-        description: 'Package Name'
-        required: true
-        default: 'Xenia-Canary-UWP'
 
 jobs:
-  build:
-    runs-on: windows-2022
-
-    env:
-      ProjectPath: xenia-canary-uwp/xenia-canary-uwp.vcxproj
-      Platform: x64
-      Configuration: Release
-      BuildMode: SideLoadOnly
-      AppxBundle: Never
-      ProjectDirectory: .\xenia-canary-uwp
-      PackageOutputRootDir: C:\AppPackage
-      PackageOutputDir: Xenia-Canary
+  clone-and-upload:
+    runs-on: windows-latest
 
     steps:
-      - name: Add msbuild to PATH
-        uses: microsoft/setup-msbuild@v2
-
-      - name: Checkout Repository
+      - name: Checkout repository
         uses: actions/checkout@v3
         with:
+          repository: izzy2lost/xenia
           submodules: true
           fetch-depth: 0
-          ref: canary_experimental
-
-      - name: Setup NuGet
-        uses: NuGet/setup-nuget@v1
 
       - name: Download and Setup Premake5
         run: |
@@ -61,51 +36,17 @@ jobs:
           Write-Host "xb premake step completed."
         shell: pwsh
 
-      - name: Compile Solution
+      - name: Build project
         run: |
-          msbuild xenia.sln /p:Configuration=Release /p:Platform=x64 /t:build /p:PlatformToolset=v143
+          msbuild xenia/xenia-canary-uwp/xenia-canary-uwp.vcxproj /p:Configuration=Release /p:Platform=x64
         shell: pwsh
 
-      - name: Generate Self-Signed Certificate
-        id: generate_cert
+      - name: Zip repository
         run: |
-          $cert = New-SelfSignedCertificate -CertStoreLocation "Cert:\CurrentUser\My" -Subject "CN=MyUWPCert" -KeyAlgorithm RSA -KeyLength 2048 -Provider "Microsoft Enhanced RSA and AES Cryptographic Provider" -KeyExportPolicy Exportable -NotAfter (Get-Date).AddYears(1) -Type CodeSigningCert
-          echo "THUMBPRINT=$($cert.Thumbprint)" >> $env:GITHUB_ENV
-        shell: pwsh
-
-      - name: Set Package Name
-        id: set_package_name
-        run: |
-          echo "PACKAGE_NAME=${{ github.event.inputs.package_name }}_${{ github.event.inputs.tag_name }}" >> $GITHUB_ENV
-
-      - name: App Build
-        run: |
-          msbuild $env:ProjectPath `
-            /p:Platform=$env:Platform `
-            /p:Configuration=$env:Configuration `
-            /p:UapAppxPackageBuildMode=$env:BuildMode `
-            /p:AppxBundle=$env:AppxBundle `
-            /p:PackageCertificateThumbprint="${{ env.THUMBPRINT }}" `
-            /p:AppxPackageTestDir="${{ env.PackageOutputRootDir }}\${{ env.PACKAGE_NAME }}" `
-            /restore
-        shell: pwsh
-
-      - name: Create Archive
-        run: |
-          $PackagePath = "${{ env.PackageOutputRootDir }}\${{ env.PACKAGE_NAME }}"
-          if (Test-Path $PackagePath) {
-            Write-Host "Creating archive for: $PackagePath"
-            Compress-Archive -Path "$PackagePath\*" -DestinationPath "${{ env.PackageOutputRootDir }}\${{ env.PACKAGE_NAME }}.zip"
-            Write-Host "Contents of package output directory after archiving:"
-            Get-ChildItem -Path "${{ env.PackageOutputRootDir }}" -Recurse
-          } else {
-            Write-Host "Package path does not exist for archiving: $PackagePath"
-            exit 1
-          }
-        shell: pwsh
-
-      - name: Upload Build Artifact
+          Compress-Archive -Path . -DestinationPath xenia.zip
+        
+      - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ github.event.inputs.package_name }} Build
-          path: ${{ env.PackageOutputRootDir }}\${{ env.PACKAGE_NAME }}.zip
+          name: xenia-repo
+          path: xenia.zip
